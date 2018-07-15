@@ -1,115 +1,252 @@
+import argparse
+from json import dumps
 from getpass import getpass
+from sys import argv
+
 import praw
 
 
-def get_subreddits(reddit, **generator_kwargs):
-    return list(reddit.user.subreddits(params=generator_kwargs))
+def get_subreddits(reddit):
+    return list(reddit.user.subreddits(limit=None))
 
 
-def set_subreddits(reddit, subreddits):
-    pass
+def set_subreddits(reddit, items, brief):
+    subreddit = reddit.subreddit(items[0].display_name)
+    subreddit.subscribe(items[1:])
+
+    if not brief:
+        subreddit_names = sorted([item.display_name for item in items])
+        print('=== subscribed to the following subreddits:')
+        print(', '.join(subreddit_names))
 
 
-def get_upvoted(reddit, **generator_kwargs):
-    return list(reddit.user.me().upvoted(params=generator_kwargs))
+def get_upvoted(reddit):
+    return list(reddit.user.me().upvoted(limit=None))
 
 
-def set_upvoted(reddit, upvoted):
-    pass
+def set_upvoted(reddit, items, brief):
+    for item in items:
+        if type(item) == praw.models.Submission:
+            submission = reddit.submission(item.id)
+            submission.upvote()
+
+            if not brief:
+                print('=== upvoted submission titled "{}" from subreddit "{}"'
+                      .format(submission.title, submission.subreddit.display_name))
+        elif type(item) == praw.models.Comment:
+            comment = reddit.comment(item.id)
+            comment.upvote()
+
+            if not brief:
+                print('=== upvoted comment with body "{}..." from submission "{}"'
+                      .format(comment.body[:40], comment.link_title))
 
 
-def get_downvoted(reddit, **generator_kwargs):
-    return list(reddit.user.me().downvoted(params=generator_kwargs))
+def get_downvoted(reddit):
+    return list(reddit.user.me().downvoted(limit=None))
 
 
-def set_downvoted(reddit, downvoted):
-    pass
+def set_downvoted(reddit, items, brief):
+    for item in items:
+        if type(item) == praw.models.Submission:
+            submission = reddit.submission(item.id)
+            submission.downvote()
+
+            if not brief:
+                print('=== downvoted submission titled "{}" from subreddit "{}"'
+                      .format(submission.title, submission.subreddit.display_name))
+        elif type(item) == praw.models.Comment:
+            comment = reddit.comment(item.id)
+            comment.downvote()
+
+            if not brief:
+                print('=== downvoted comment with body "{}..." from submission "{}"'
+                      .format(comment.body[:40], comment.link_title))
 
 
-def get_saved(reddit, **generator_kwargs):
-    return list(reddit.user.me().saved(params=generator_kwargs))
+def get_saved(reddit):
+    return list(reddit.user.me().saved(limit=None))
 
 
-def set_saved(reddit, saved):
-    pass
+def set_saved(reddit, items, brief):
+    for item in items:
+        if type(item) == praw.models.Submission:
+            submission = reddit.submission(item.id)
+            submission.save()
+
+            if not brief:
+                print('=== saved submission titled "{}" from subreddit "{}"'
+                      .format(submission.title, submission.subreddit.display_name))
+        elif type(item) == praw.models.Comment:
+            comment = reddit.comment(item.id)
+            comment.save()
+
+            if not brief:
+                print('=== saved comment with body "{}..." from submission "{}"'
+                      .format(comment.body[:40], comment.link_title))
 
 
-def get_hidden(reddit, **generator_kwargs):
-    return list(reddit.user.me().hidden(params=generator_kwargs))
+def get_hidden(reddit):
+    return list(reddit.user.me().hidden(limit=None))
 
 
-def set_hidden(reddit, hidden):
-    pass
+def set_hidden(reddit, items, brief):
+    for item in items:
+        submission = reddit.submission(item.id)
+        submission.hide()
 
-
-def get_gilded(reddit, **generator_kwargs):
-    return list(reddit.user.me().gilded(params=generator_kwargs))
-
-
-def set_gilded(reddit, gilded):
-    pass
-
-
-def get_gildings(reddit, **generator_kwargs):
-    return list(reddit.user.me().gildings(params=generator_kwargs))
+        if not brief:
+            print('=== hid submission titled "{}" from subreddit "{}"'
+                  .format(submission.title, submission.subreddit.display_name))
 
 
 def get_friends(reddit):
     return reddit.user.friends()
 
 
-def set_friends(reddit, friends):
-    pass
+def set_friends(reddit, items, brief):
+    for item in items:
+        redditor = reddit.redditor(item.name)
+        redditor.friend()
+
+        if not brief:
+            print('=== friended redditor named "{}"'.format(redditor.name))
 
 
 def get_blocked(reddit):
     return reddit.user.blocked()
 
 
-def set_blocked(reddit, blocked):
-    pass
+def set_blocked(reddit, items, brief):
+    for item in items:
+        redditor = reddit.redditor(item.name)
+        redditor.block()
+
+        if not brief:
+            print('=== blocked redditor named "{}"'.format(redditor.name))
 
 
 def get_preferences(reddit):
-    return reddit.user.preferences
+    return reddit.user.preferences()
 
 
-def set_preferences(reddit, preferences):
-    pass
+def set_preferences(reddit, item, brief):
+    reddit.user.preferences.update(**item)
+
+    if not brief:
+        print('=== updated preferences to the following:')
+        print(dumps(item, sort_keys=True, indent=4))
 
 
 if __name__ == '__main__':
-    old_acct_reddit = praw.Reddit(client_id=input('enter client id for old account: '),
-                                  client_secret=getpass('enter client secret for old account: '),
-                                  username=input('enter username for old account: '),
-                                  password=getpass('enter password for old account: '),
-                                  user_agent='account-migrator for old account')
+    parser = argparse.ArgumentParser(description='Transfer user data between Reddit accounts')
+    parser.add_argument('-q', '--brief', action='store_true', help='suppress status output')
+    args = parser.parse_args()
 
+    old_client_id = input('>>> enter client id for old account: ')
+    old_client_secret = getpass('>>> enter client secret for old account: ')
+    old_username = input('>>> enter username for old account: ')
+    old_password = getpass('>>> enter password for old account: ')
+    old_user_agent = 'account-migrator for old account'
+
+    new_client_id = input('>>> enter client id for new account: ')
+    new_client_secret = getpass('>>> enter client secret for new account: ')
+    new_username = input('>>> enter username for new account: ')
+    new_password = getpass('>>> enter password for new account: ')
+    new_user_agent = 'account-migrator for new account'
+
+    old_acct_reddit = praw.Reddit(client_id=old_client_id,
+                                  client_secret=old_client_secret,
+                                  username=old_username,
+                                  password=old_password,
+                                  user_agent=old_user_agent)
+
+    new_acct_reddit = praw.Reddit(client_id=new_client_id,
+                                  client_secret=new_client_secret,
+                                  username=new_username,
+                                  password=new_password,
+                                  user_agent=new_user_agent)
+
+    print('=== fetching user data from old account "{}"...'.format(old_username))
+
+    if not args.brief:
+        print('=== looking for subscribed subreddits...')
     subreddits = get_subreddits(old_acct_reddit)
+    n_subreddits = len(subreddits)
+    if not args.brief:
+        print('=== found {} {}'.format(n_subreddits, 'subreddit' if n_subreddits == 1 else 'subreddits'))
+
+    if not args.brief:
+        print('=== looking for upvoted items...')
     upvoted = get_upvoted(old_acct_reddit)
+    n_upvoted = len(upvoted)
+    if not args.brief:
+        print('=== found {} upvoted {}'.format(n_upvoted, 'item' if n_upvoted == 1 else 'items'))
+
+    if not args.brief:
+        print('=== looking for downvoted items...')
     downvoted = get_downvoted(old_acct_reddit)
+    n_downvoted = len(downvoted)
+    if not args.brief:
+        print('=== found {} downvoted {}'.format(n_downvoted, 'item' if n_downvoted == 1 else 'items'))
+
+    if not args.brief:
+        print('=== looking for saved items...')
     saved = get_saved(old_acct_reddit)
+    n_saved = len(saved)
+    if not args.brief:
+        print('=== found {} saved {}'.format(n_saved, 'item' if n_saved == 1 else 'items'))
+
+    if not args.brief:
+        print('=== looking for hidden items...')
     hidden = get_hidden(old_acct_reddit)
-    gilded = get_gilded(old_acct_reddit)
-    gildings = get_gildings(old_acct_reddit)
+    n_hidden = len(hidden)
+    if not args.brief:
+        print('=== found {} hidden {}'.format(n_hidden, 'item' if n_hidden == 1 else 'items'))
+
+    if not args.brief:
+        print('=== looking for friended redditors...')
     friends = get_friends(old_acct_reddit)
+    n_friends = len(friends)
+    if not args.brief:
+        print('=== found {} friended {}'.format(n_friends, 'redditor' if  n_friends == 1 else 'redditors'))
+
+    if not args.brief:
+        print('=== looking for blocked redditors...')
     blocked = get_blocked(old_acct_reddit)
+    n_blocked = len(blocked)
+    if not args.brief:
+        print('=== found {} blocked {}'.format(n_blocked, 'redditor' if n_blocked == 1 else 'redditors'))
+
+    if not args.brief:
+        print('=== looking for preferences...')
     preferences = get_preferences(old_acct_reddit)
+    if not args.brief:
+        print('=== found preferences')
 
-    new_acct_reddit = praw.Reddit(client_id=input('enter client id for new account: '),
-                                  client_secret=getpass('enter client secret for new account: '),
-                                  username=input('enter username for new account: '),
-                                  password=getpass('enter password for new account: '),
-                                  user_agent='account-migrator for new account')
+    print('=== transfer user data to new account "{}"...'.format(new_username))
 
-    set_subreddits(new_acct_reddit, subreddits)
-    set_upvoted(new_acct_reddit, upvoted)
-    set_downvoted(new_acct_reddit, downvoted)
-    set_saved(new_acct_reddit, saved)
-    set_hidden(new_acct_reddit, hidden)
-    set_gilded(new_acct_reddit, gilded)
-    set_gildings(new_acct_reddit, gildings)
-    set_friends(new_acct_reddit, friends)
-    set_blocked(new_acct_reddit, blocked)
-    set_preferences(new_acct_reddit, preferences)
+    print('=== subscribing to {} {}...'.format(n_subreddits, 'subreddit' if n_subreddits == 1 else 'subreddits'))
+    set_subreddits(new_acct_reddit, subreddits, args.brief)
+
+    print('=== upvoting {} {}...'.format(n_upvoted, 'item' if n_upvoted == 1 else 'items'))
+    set_upvoted(new_acct_reddit, upvoted[::-1], args.brief)
+
+    print('=== downvoting {} {}...'.format(n_downvoted, 'item' if n_downvoted == 1 else 'items'))
+    set_downvoted(new_acct_reddit, downvoted[::-1], args.brief)
+
+    print('=== saving {} {}...'.format(n_saved, 'item' if n_saved == 1 else 'items'))
+    set_saved(new_acct_reddit, saved[::-1], args.brief)
+
+    print('=== hiding {} {}...'.format(n_hidden, 'item' if n_hidden == 1 else 'items'))
+    set_hidden(new_acct_reddit, hidden[::-1], args.brief)
+
+    print('=== friending {} {}...'.format(n_friends, 'redditor' if n_friends == 1 else 'redditors'))
+    set_friends(new_acct_reddit, friends, args.brief)
+
+    print('=== blocking {} {}...'.format(n_blocked, 'redditor' if n_blocked == 1 else 'redditors'))
+    set_blocked(new_acct_reddit, blocked, args.brief)
+
+    print('=== setting preferences')
+    set_preferences(new_acct_reddit, preferences, args.brief)
 
