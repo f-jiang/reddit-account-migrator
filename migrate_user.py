@@ -4,186 +4,285 @@ from getpass import getpass
 from sys import argv
 
 import praw
+import prawcore
 
 
 def get_subreddits(reddit):
-    return list(reddit.user.subreddits(limit=None))
+    try:
+        return list(reddit.user.subreddits(limit=None))
+    except prawcore.PrawcoreException as e:
+        print('!!! failed to fetch subreddits: {}'.format(e))
+        return []
 
 
 def set_subreddits(reddit, items, brief):
-    subreddit = reddit.subreddit(items[0].display_name)
-    subreddit.subscribe(items[1:])
+    try:
+        subreddit = reddit.subreddit(items[0].display_name)
+        subreddit.subscribe(items[1:])
 
-    if not brief:
-        subreddit_names = sorted([item.display_name for item in items])
-        print('=== subscribed to the following subreddits:')
-        print(', '.join(subreddit_names))
+        if not brief:
+            subreddit_names = sorted([item.display_name for item in items])
+            print('=== subscribed to the following subreddits:')
+            print(', '.join(subreddit_names))
+
+        return True
+    except prawcore.PrawcoreException as e:
+        print('!!! failed to subscribe to subreddits: {}'.format(e))
+        return False
 
 
 def get_upvoted(reddit):
-    return list(reddit.user.me().upvoted(limit=None))
+    try:
+        return list(reddit.user.me().upvoted(limit=None))
+    except prawcore.PrawcoreException as e:
+        print('!!! failed to fetch upvoted items: {}'.format(e))
+        return []
 
 
 def set_upvoted(reddit, items, brief):
     n_items = len(items)
     field_width = len(str(n_items))
+    n_failed = 0
 
     for i in range(n_items):
         if type(items[i]) == praw.models.Submission:
-            submission = reddit.submission(items[i].id)
-            submission.upvote()
+            try:
+                submission = reddit.submission(items[i].id)
+                submission.upvote()
 
-            if not brief:
-                print('=== ({:<{width}} of {:<{width}}) upvoted submission titled "{}" from subreddit "{}"'
-                      .format(i + 1,
-                              n_items,
-                              submission.title,
-                              submission.subreddit.display_name,
-                              width=field_width))
+                if not brief:
+                    print('=== ({:<{width}} of {:<{width}}) upvoted submission titled "{}" from subreddit "{}"'
+                          .format(i + 1,
+                                  n_items,
+                                  submission.title,
+                                  submission.subreddit.display_name,
+                                  width=field_width))
+            except prawcore.PrawcoreException as e:
+                print('!!! failed to upvote submission: {}'.format(e))
+                n_failed += 1
         elif type(items[i]) == praw.models.Comment:
-            comment = reddit.comment(items[i].id)
-            comment.upvote()
+            try:
+                comment = reddit.comment(items[i].id)
+                comment.upvote()
 
-            if not brief:
-                print('=== ({:<{width}} of {:<{width}}) upvoted comment with body "{}..." from submission "{}"'
-                      .format(i + 1,
-                              n_items,
-                              comment.body[:40],
-                              comment.link_title,
-                              width=field_width))
+                if not brief:
+                    print('=== ({:<{width}} of {:<{width}}) upvoted comment with body "{}..." from submission "{}"'
+                          .format(i + 1,
+                                  n_items,
+                                  comment.body[:40],
+                                  comment.link_title,
+                                  width=field_width))
+            except prawcore.PrawcoreException as e:
+                print('!!! failed to upvote comment: {}'.format(e))
+                n_failed += 1
+
+    return n_failed
 
 
 def get_downvoted(reddit):
-    return list(reddit.user.me().downvoted(limit=None))
+    try:
+        return list(reddit.user.me().downvoted(limit=None))
+    except prawcore.PrawcoreException as e:
+        print('!!! failed to fetch downvoted items: {}'.format(e))
+        return []
 
 
 def set_downvoted(reddit, items, brief):
     n_items = len(items)
     field_width = len(str(n_items))
+    n_failed = 0
 
     for i in range(n_items):
         if type(items[i]) == praw.models.Submission:
-            submission = reddit.submission(items[i].id)
-            submission.downvote()
+            try:
+                submission = reddit.submission(items[i].id)
+                submission.downvote()
 
-            if not brief:
-                print('=== ({:<{width}} of {:<{width}}) downvoted submission titled "{}" from subreddit "{}"'
-                      .format(i + 1,
-                              n_items,
-                              submission.title,
-                              submission.subreddit.display_name,
-                              width=field_width))
+                if not brief:
+                    print('=== ({:<{width}} of {:<{width}}) downvoted submission titled "{}" from subreddit "{}"'
+                          .format(i + 1,
+                                  n_items,
+                                  submission.title,
+                                  submission.subreddit.display_name,
+                                  width=field_width))
+            except prawcore.PrawcoreException as e:
+                print('!!! failed to downvote submission: {}'.format(e))
+                n_failed += 1
         elif type(items[i]) == praw.models.Comment:
-            comment = reddit.comment(items[i].id)
-            comment.downvote()
+            try:
+                comment = reddit.comment(items[i].id)
+                comment.downvote()
 
-            if not brief:
-                print('=== ({:<{width}} of {:<{width}}) downvoted comment with body "{}..." from submission "{}"'
-                      .format(i + 1,
-                              n_items,
-                              comment.body[:40],
-                              comment.link_title,
-                              width=field_width))
+                if not brief:
+                    print('=== ({:<{width}} of {:<{width}}) downvoted comment with body "{}..." from submission "{}"'
+                          .format(i + 1,
+                                  n_items,
+                                  comment.body[:40],
+                                  comment.link_title,
+                                  width=field_width))
+            except prawcore.PrawcoreException as e:
+                print('!!! failed to downvote comment: {}'.format(e))
+                n_failed += 1
+
+    return n_failed
 
 
 def get_saved(reddit):
-    return list(reddit.user.me().saved(limit=None))
+    try:
+        return list(reddit.user.me().saved(limit=None))
+    except prawcore.PrawcoreException as e:
+        print('!!! failed to fetch saved items: {}'.format(e))
+        return []
 
 
 def set_saved(reddit, items, brief):
     n_items = len(items)
     field_width = len(str(n_items))
+    n_failed = 0
 
     for i in range(n_items):
         if type(items[i]) == praw.models.Submission:
-            submission = reddit.submission(items[i].id)
-            submission.save()
+            try:
+                submission = reddit.submission(items[i].id)
+                submission.save()
 
-            if not brief:
-                print('=== ({:<{width}} of {:<{width}}) saved submission titled "{}" from subreddit "{}"'
-                      .format(i + 1,
-                              n_items,
-                              submission.title,
-                              submission.subreddit.display_name,
-                              width=field_width))
+                if not brief:
+                    print('=== ({:<{width}} of {:<{width}}) saved submission titled "{}" from subreddit "{}"'
+                          .format(i + 1,
+                                  n_items,
+                                  submission.title,
+                                  submission.subreddit.display_name,
+                                  width=field_width))
+            except prawcore.PrawcoreException as e:
+                print('!!! failed to save submission: {}'.format(e))
+                n_failed += 1
         elif type(items[i]) == praw.models.Comment:
-            comment = reddit.comment(items[i].id)
-            comment.save()
+            try:
+                comment = reddit.comment(items[i].id)
+                comment.save()
 
-            if not brief:
-                print('=== ({:<{width}} of {:<{width}}) saved comment with body "{}..." from submission "{}"'
-                      .format(i + 1,
-                              n_items,
-                              comment.body[:40],
-                              comment.link_title,
-                              width=field_width))
+                if not brief:
+                    print('=== ({:<{width}} of {:<{width}}) saved comment with body "{}..." from submission "{}"'
+                          .format(i + 1,
+                                  n_items,
+                                  comment.body[:40],
+                                  comment.link_title,
+                                  width=field_width))
+            except prawcore.PrawcoreException as e:
+                print('!!! failed to save comment: {}'.format(e))
+                n_failed += 1
+
+        return n_failed
 
 
 def get_hidden(reddit):
-    return list(reddit.user.me().hidden(limit=None))
+    try:
+        return list(reddit.user.me().hidden(limit=None))
+    except prawcore.PrawcoreException as e:
+        print('!!! failed to fetch hidden items: {}'.format(e))
+        return []
 
 
 def set_hidden(reddit, items, brief):
     n_items = len(items)
     field_width = len(str(n_items))
+    n_failed = 0
 
     for i in range(n_items):
-        submission = reddit.submission(items[i].id)
-        submission.hide()
+        try:
+            submission = reddit.submission(items[i].id)
+            submission.hide()
 
-        if not brief:
-            print('=== ({:<{width}} of {:<{width}}) hid submission titled "{}" from subreddit "{}"'
-                  .format(i + 1,
-                          n_items,
-                          submission.title,
-                          submission.subreddit.display_name,
-                          width=field_width))
+            if not brief:
+                print('=== ({:<{width}} of {:<{width}}) hid submission titled "{}" from subreddit "{}"'
+                      .format(i + 1,
+                              n_items,
+                              submission.title,
+                              submission.subreddit.display_name,
+                              width=field_width))
+        except prawcore.PrawcoreException as e:
+            print('!!! failed to hide submission: {}'.format(e))
+            n_failed += 1
+
+    return n_failed
 
 
 def get_friends(reddit):
-    return reddit.user.friends()
+    try:
+        return reddit.user.friends()
+    except prawcore.PrawcoreException as e:
+        print('!!! failed to fetch friended redditors: {}'.format(e))
+        return []
 
 
 def set_friends(reddit, items, brief):
     n_items = len(items)
     field_width = len(str(n_items))
+    n_failed = 0
 
     for i in range(n_items):
-        redditor = reddit.redditor(items[i].name)
-        redditor.friend()
+        try:
+            redditor = reddit.redditor(items[i].name)
+            redditor.friend()
 
-        if not brief:
-            print('=== ({:<{width}} of {:<{width}}) friended redditor named "{}"'
-                  .format(i + 1, n_items, redditor.name, width=field_width))
+            if not brief:
+                print('=== ({:<{width}} of {:<{width}}) friended redditor named "{}"'
+                      .format(i + 1, n_items, redditor.name, width=field_width))
+        except prawcore.PrawcoreException as e:
+            print('!!! failed to friend redditor: {}'.format(e))
+            n_failed += 1
+
+    return n_failed
 
 
 def get_blocked(reddit):
-    return reddit.user.blocked()
+    try:
+        return reddit.user.blocked()
+    except prawcore.PrawcoreException as e:
+        print('!!! failed to fetch blocked redditors: {}'.format(e))
+        return []
 
 
 def set_blocked(reddit, items, brief):
     n_items = len(items)
     field_width = len(str(n_items))
+    n_failed = 0
 
     for i in range(n_items):
-        redditor = reddit.redditor(items[i].name)
-        redditor.block()
+        try:
+            redditor = reddit.redditor(items[i].name)
+            redditor.block()
 
-        if not brief:
-            print('=== ({:<{width}} of {:<{width}}) blocked redditor named "{}"'
-                  .format(i + 1, n_items, redditor.name, width=field_width))
+            if not brief:
+                print('=== ({:<{width}} of {:<{width}}) blocked redditor named "{}"'
+                      .format(i + 1, n_items, redditor.name, width=field_width))
+        except prawcore.PrawcoreException as e:
+            print('!!! failed to block redditor: {}'.format(e))
+            n_failed += 1
+
+    return n_failed
 
 
 def get_preferences(reddit):
-    return reddit.user.preferences()
+    try:
+        return reddit.user.preferences()
+    except prawcore.PrawcoreException as e:
+        print('!!! failed to fetch preferences: {}'.format(e))
+        return []
 
 
 def set_preferences(reddit, item, brief):
-    reddit.user.preferences.update(**item)
+    try:
+        reddit.user.preferences.update(**item)
 
-    if not brief:
-        print('=== updated preferences to the following:')
-        print(dumps(item, sort_keys=True, indent=4))
+        if not brief:
+            print('=== updated preferences to the following:')
+            print(dumps(item, sort_keys=True, indent=4))
+
+        return True
+    except prawcore.PrawcoreException as e:
+        print('!!! failed to set preferences: {}'.format(e))
+        return False
 
 
 if __name__ == '__main__':
