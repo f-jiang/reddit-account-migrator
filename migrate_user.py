@@ -218,56 +218,56 @@ if __name__ == '__main__':
     print('=== fetching user data from old account "{}"...'.format(old_username))
 
     if not args.brief:
-        print('=== looking for subscribed subreddits...')
+        print('=== fetching subscribed subreddits...')
     subreddits = get_subreddits(old_acct_reddit)
     n_subreddits = len(subreddits)
     if not args.brief:
         print('=== found {} {}'.format(n_subreddits, 'subreddit' if n_subreddits == 1 else 'subreddits'))
 
     if not args.brief:
-        print('=== looking for upvoted items...')
+        print('=== fetching upvoted items...')
     upvoted = get_upvoted(old_acct_reddit)
     n_upvoted = len(upvoted)
     if not args.brief:
         print('=== found {} upvoted {}'.format(n_upvoted, 'item' if n_upvoted == 1 else 'items'))
 
     if not args.brief:
-        print('=== looking for downvoted items...')
+        print('=== fetching downvoted items...')
     downvoted = get_downvoted(old_acct_reddit)
     n_downvoted = len(downvoted)
     if not args.brief:
         print('=== found {} downvoted {}'.format(n_downvoted, 'item' if n_downvoted == 1 else 'items'))
 
     if not args.brief:
-        print('=== looking for saved items...')
+        print('=== fetching saved items...')
     saved = get_saved(old_acct_reddit)
     n_saved = len(saved)
     if not args.brief:
         print('=== found {} saved {}'.format(n_saved, 'item' if n_saved == 1 else 'items'))
 
     if not args.brief:
-        print('=== looking for hidden items...')
+        print('=== fetching hidden items...')
     hidden = get_hidden(old_acct_reddit)
     n_hidden = len(hidden)
     if not args.brief:
         print('=== found {} hidden {}'.format(n_hidden, 'item' if n_hidden == 1 else 'items'))
 
     if not args.brief:
-        print('=== looking for friended redditors...')
+        print('=== fetching friended redditors...')
     friends = get_friends(old_acct_reddit)
     n_friends = len(friends)
     if not args.brief:
         print('=== found {} friended {}'.format(n_friends, 'redditor' if  n_friends == 1 else 'redditors'))
 
     if not args.brief:
-        print('=== looking for blocked redditors...')
+        print('=== fetching blocked redditors...')
     blocked = get_blocked(old_acct_reddit)
     n_blocked = len(blocked)
     if not args.brief:
         print('=== found {} blocked {}'.format(n_blocked, 'redditor' if n_blocked == 1 else 'redditors'))
 
     if not args.brief:
-        print('=== looking for preferences...')
+        print('=== fetching preferences...')
     preferences = get_preferences(old_acct_reddit)
     if not args.brief:
         print('=== found preferences')
