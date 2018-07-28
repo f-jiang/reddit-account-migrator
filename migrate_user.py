@@ -25,21 +25,32 @@ def get_upvoted(reddit):
 
 
 def set_upvoted(reddit, items, brief):
-    for item in items:
-        if type(item) == praw.models.Submission:
-            submission = reddit.submission(item.id)
+    n_items = len(items)
+    field_width = len(str(n_items))
+
+    for i in range(n_items):
+        if type(items[i]) == praw.models.Submission:
+            submission = reddit.submission(items[i].id)
             submission.upvote()
 
             if not brief:
-                print('=== upvoted submission titled "{}" from subreddit "{}"'
-                      .format(submission.title, submission.subreddit.display_name))
-        elif type(item) == praw.models.Comment:
-            comment = reddit.comment(item.id)
+                print('=== ({:<{width}} of {:<{width}}) upvoted submission titled "{}" from subreddit "{}"'
+                      .format(i + 1,
+                              n_items,
+                              submission.title,
+                              submission.subreddit.display_name,
+                              width=field_width))
+        elif type(items[i]) == praw.models.Comment:
+            comment = reddit.comment(items[i].id)
             comment.upvote()
 
             if not brief:
-                print('=== upvoted comment with body "{}..." from submission "{}"'
-                      .format(comment.body[:40], comment.link_title))
+                print('=== ({:<{width}} of {:<{width}}) upvoted comment with body "{}..." from submission "{}"'
+                      .format(i + 1,
+                              n_items,
+                              comment.body[:40],
+                              comment.link_title,
+                              width=field_width))
 
 
 def get_downvoted(reddit):
@@ -47,21 +58,32 @@ def get_downvoted(reddit):
 
 
 def set_downvoted(reddit, items, brief):
-    for item in items:
-        if type(item) == praw.models.Submission:
-            submission = reddit.submission(item.id)
+    n_items = len(items)
+    field_width = len(str(n_items))
+
+    for i in range(n_items):
+        if type(items[i]) == praw.models.Submission:
+            submission = reddit.submission(items[i].id)
             submission.downvote()
 
             if not brief:
-                print('=== downvoted submission titled "{}" from subreddit "{}"'
-                      .format(submission.title, submission.subreddit.display_name))
-        elif type(item) == praw.models.Comment:
-            comment = reddit.comment(item.id)
+                print('=== ({:<{width}} of {:<{width}}) downvoted submission titled "{}" from subreddit "{}"'
+                      .format(i + 1,
+                              n_items,
+                              submission.title,
+                              submission.subreddit.display_name,
+                              width=field_width))
+        elif type(items[i]) == praw.models.Comment:
+            comment = reddit.comment(items[i].id)
             comment.downvote()
 
             if not brief:
-                print('=== downvoted comment with body "{}..." from submission "{}"'
-                      .format(comment.body[:40], comment.link_title))
+                print('=== ({:<{width}} of {:<{width}}) downvoted comment with body "{}..." from submission "{}"'
+                      .format(i + 1,
+                              n_items,
+                              comment.body[:40],
+                              comment.link_title,
+                              width=field_width))
 
 
 def get_saved(reddit):
@@ -69,21 +91,32 @@ def get_saved(reddit):
 
 
 def set_saved(reddit, items, brief):
-    for item in items:
-        if type(item) == praw.models.Submission:
-            submission = reddit.submission(item.id)
+    n_items = len(items)
+    field_width = len(str(n_items))
+
+    for i in range(n_items):
+        if type(items[i]) == praw.models.Submission:
+            submission = reddit.submission(items[i].id)
             submission.save()
 
             if not brief:
-                print('=== saved submission titled "{}" from subreddit "{}"'
-                      .format(submission.title, submission.subreddit.display_name))
-        elif type(item) == praw.models.Comment:
-            comment = reddit.comment(item.id)
+                print('=== ({:<{width}} of {:<{width}}) saved submission titled "{}" from subreddit "{}"'
+                      .format(i + 1,
+                              n_items,
+                              submission.title,
+                              submission.subreddit.display_name,
+                              width=field_width))
+        elif type(items[i]) == praw.models.Comment:
+            comment = reddit.comment(items[i].id)
             comment.save()
 
             if not brief:
-                print('=== saved comment with body "{}..." from submission "{}"'
-                      .format(comment.body[:40], comment.link_title))
+                print('=== ({:<{width}} of {:<{width}}) saved comment with body "{}..." from submission "{}"'
+                      .format(i + 1,
+                              n_items,
+                              comment.body[:40],
+                              comment.link_title,
+                              width=field_width))
 
 
 def get_hidden(reddit):
@@ -91,13 +124,20 @@ def get_hidden(reddit):
 
 
 def set_hidden(reddit, items, brief):
-    for item in items:
-        submission = reddit.submission(item.id)
+    n_items = len(items)
+    field_width = len(str(n_items))
+
+    for i in range(n_items):
+        submission = reddit.submission(items[i].id)
         submission.hide()
 
         if not brief:
-            print('=== hid submission titled "{}" from subreddit "{}"'
-                  .format(submission.title, submission.subreddit.display_name))
+            print('=== ({:<{width}} of {:<{width}}) hid submission titled "{}" from subreddit "{}"'
+                  .format(i + 1,
+                          n_items,
+                          submission.title,
+                          submission.subreddit.display_name,
+                          width=field_width))
 
 
 def get_friends(reddit):
@@ -105,12 +145,16 @@ def get_friends(reddit):
 
 
 def set_friends(reddit, items, brief):
-    for item in items:
-        redditor = reddit.redditor(item.name)
+    n_items = len(items)
+    field_width = len(str(n_items))
+
+    for i in range(n_items):
+        redditor = reddit.redditor(items[i].name)
         redditor.friend()
 
         if not brief:
-            print('=== friended redditor named "{}"'.format(redditor.name))
+            print('=== ({:<{width}} of {:<{width}}) friended redditor named "{}"'
+                  .format(i + 1, n_items, redditor.name, width=field_width))
 
 
 def get_blocked(reddit):
@@ -118,12 +162,16 @@ def get_blocked(reddit):
 
 
 def set_blocked(reddit, items, brief):
-    for item in items:
-        redditor = reddit.redditor(item.name)
+    n_items = len(items)
+    field_width = len(str(n_items))
+
+    for i in range(n_items):
+        redditor = reddit.redditor(items[i].name)
         redditor.block()
 
         if not brief:
-            print('=== blocked redditor named "{}"'.format(redditor.name))
+            print('=== ({:<{width}} of {:<{width}}) blocked redditor named "{}"'
+                  .format(i + 1, n_items, redditor.name, width=field_width))
 
 
 def get_preferences(reddit):
