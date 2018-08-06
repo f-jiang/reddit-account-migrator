@@ -393,6 +393,6 @@ if __name__ == '__main__':
     print('=== blocking {} {}...'.format(n_blocked, 'redditor' if n_blocked == 1 else 'redditors'))
     set_blocked(new_acct_reddit, blocked, args.brief)
 
-    print('=== setting preferences')
+    print('=== setting preferences...')
     set_preferences(new_acct_reddit, preferences, args.brief)
 
