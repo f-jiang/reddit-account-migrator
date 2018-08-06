@@ -24,3 +24,7 @@ optional arguments:
   -q, --brief  suppress status output
 ```
 
+## Setup
+
+For each Reddit account, go to Preferences > Apps and create a "personal use script" with a placeholder redirect uri such as `http://localhost:8080`. Take note of the app's client ID and secret.
+
