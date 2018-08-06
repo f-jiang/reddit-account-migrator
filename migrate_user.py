@@ -4,13 +4,12 @@ from getpass import getpass
 from sys import argv
 
 import praw
-import prawcore
 
 
 def get_subreddits(reddit):
     try:
         return list(reddit.user.subreddits(limit=None))
-    except prawcore.PrawcoreException as e:
+    except Exception as e:
         print('!!! failed to fetch subreddits: {}'.format(e))
         return []
 
@@ -26,7 +25,7 @@ def set_subreddits(reddit, items, brief):
             print(', '.join(subreddit_names))
 
         return True
-    except prawcore.PrawcoreException as e:
+    except Exception as e:
         print('!!! failed to subscribe to subreddits: {}'.format(e))
         return False
 
@@ -34,7 +33,7 @@ def set_subreddits(reddit, items, brief):
 def get_upvoted(reddit):
     try:
         return list(reddit.user.me().upvoted(limit=None))
-    except prawcore.PrawcoreException as e:
+    except Exception as e:
         print('!!! failed to fetch upvoted items: {}'.format(e))
         return []
 
@@ -57,7 +56,7 @@ def set_upvoted(reddit, items, brief):
                                   submission.title,
                                   submission.subreddit.display_name,
                                   width=field_width))
-            except prawcore.PrawcoreException as e:
+            except Exception as e:
                 print('!!! failed to upvote submission: {}'.format(e))
                 n_failed += 1
         elif type(items[i]) == praw.models.Comment:
@@ -72,7 +71,7 @@ def set_upvoted(reddit, items, brief):
                                   comment.body[:40],
                                   comment.link_title,
                                   width=field_width))
-            except prawcore.PrawcoreException as e:
+            except Exception as e:
                 print('!!! failed to upvote comment: {}'.format(e))
                 n_failed += 1
 
@@ -82,7 +81,7 @@ def set_upvoted(reddit, items, brief):
 def get_downvoted(reddit):
     try:
         return list(reddit.user.me().downvoted(limit=None))
-    except prawcore.PrawcoreException as e:
+    except Exception as e:
         print('!!! failed to fetch downvoted items: {}'.format(e))
         return []
 
@@ -105,7 +104,7 @@ def set_downvoted(reddit, items, brief):
                                   submission.title,
                                   submission.subreddit.display_name,
                                   width=field_width))
-            except prawcore.PrawcoreException as e:
+            except Exception as e:
                 print('!!! failed to downvote submission: {}'.format(e))
                 n_failed += 1
         elif type(items[i]) == praw.models.Comment:
@@ -120,7 +119,7 @@ def set_downvoted(reddit, items, brief):
                                   comment.body[:40],
                                   comment.link_title,
                                   width=field_width))
-            except prawcore.PrawcoreException as e:
+            except Exception as e:
                 print('!!! failed to downvote comment: {}'.format(e))
                 n_failed += 1
 
@@ -130,7 +129,7 @@ def set_downvoted(reddit, items, brief):
 def get_saved(reddit):
     try:
         return list(reddit.user.me().saved(limit=None))
-    except prawcore.PrawcoreException as e:
+    except Exception as e:
         print('!!! failed to fetch saved items: {}'.format(e))
         return []
 
@@ -153,7 +152,7 @@ def set_saved(reddit, items, brief):
                                   submission.title,
                                   submission.subreddit.display_name,
                                   width=field_width))
-            except prawcore.PrawcoreException as e:
+            except Exception as e:
                 print('!!! failed to save submission: {}'.format(e))
                 n_failed += 1
         elif type(items[i]) == praw.models.Comment:
@@ -168,7 +167,7 @@ def set_saved(reddit, items, brief):
                                   comment.body[:40],
                                   comment.link_title,
                                   width=field_width))
-            except prawcore.PrawcoreException as e:
+            except Exception as e:
                 print('!!! failed to save comment: {}'.format(e))
                 n_failed += 1
 
@@ -178,7 +177,7 @@ def set_saved(reddit, items, brief):
 def get_hidden(reddit):
     try:
         return list(reddit.user.me().hidden(limit=None))
-    except prawcore.PrawcoreException as e:
+    except Exception as e:
         print('!!! failed to fetch hidden items: {}'.format(e))
         return []
 
@@ -200,7 +199,7 @@ def set_hidden(reddit, items, brief):
                               submission.title,
                               submission.subreddit.display_name,
                               width=field_width))
-        except prawcore.PrawcoreException as e:
+        except Exception as e:
             print('!!! failed to hide submission: {}'.format(e))
             n_failed += 1
 
@@ -210,7 +209,7 @@ def set_hidden(reddit, items, brief):
 def get_friends(reddit):
     try:
         return reddit.user.friends()
-    except prawcore.PrawcoreException as e:
+    except Exception as e:
         print('!!! failed to fetch friended redditors: {}'.format(e))
         return []
 
@@ -228,7 +227,7 @@ def set_friends(reddit, items, brief):
             if not brief:
                 print('=== ({:<{width}} of {:<{width}}) friended redditor named "{}"'
                       .format(i + 1, n_items, redditor.name, width=field_width))
-        except prawcore.PrawcoreException as e:
+        except Exception as e:
             print('!!! failed to friend redditor: {}'.format(e))
             n_failed += 1
 
@@ -238,7 +237,7 @@ def set_friends(reddit, items, brief):
 def get_blocked(reddit):
     try:
         return reddit.user.blocked()
-    except prawcore.PrawcoreException as e:
+    except Exception as e:
         print('!!! failed to fetch blocked redditors: {}'.format(e))
         return []
 
@@ -256,7 +255,7 @@ def set_blocked(reddit, items, brief):
             if not brief:
                 print('=== ({:<{width}} of {:<{width}}) blocked redditor named "{}"'
                       .format(i + 1, n_items, redditor.name, width=field_width))
-        except prawcore.PrawcoreException as e:
+        except Exception as e:
             print('!!! failed to block redditor: {}'.format(e))
             n_failed += 1
 
@@ -266,7 +265,7 @@ def set_blocked(reddit, items, brief):
 def get_preferences(reddit):
     try:
         return reddit.user.preferences()
-    except prawcore.PrawcoreException as e:
+    except Exception as e:
         print('!!! failed to fetch preferences: {}'.format(e))
         return []
 
@@ -280,7 +279,7 @@ def set_preferences(reddit, item, brief):
             print(dumps(item, sort_keys=True, indent=4))
 
         return True
-    except prawcore.PrawcoreException as e:
+    except Exception as e:
         print('!!! failed to set preferences: {}'.format(e))
         return False
 
