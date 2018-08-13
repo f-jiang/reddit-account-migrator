@@ -15,7 +15,7 @@
 ## Command-line usage:
 
 ```
-usage: migrate_user.py [-h] [-q]
+usage: reddit_account_migrator.py [-h] [-q]
 
 Transfer user data between Reddit accounts
 
