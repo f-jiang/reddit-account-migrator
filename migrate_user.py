@@ -1,9 +1,13 @@
 import argparse
+import datetime
 from json import dumps
 from getpass import getpass
 from sys import argv
 
 import praw
+
+
+_archive_cutoff_date = datetime.datetime.utcnow() - datetime.timedelta(days=180)
 
 
 def get_subreddits(reddit):
@@ -32,7 +36,9 @@ def set_subreddits(reddit, items, brief):
 
 def get_upvoted(reddit):
     try:
-        return list(reddit.user.me().upvoted(limit=None))
+        upvoted = list(reddit.user.me().upvoted(limit=None))
+        return [item for item in upvoted
+                if datetime.datetime.fromtimestamp(item.created_utc) > _archive_cutoff_date]
     except Exception as e:
         print('!!! failed to fetch upvoted items: {}'.format(e))
         return []
@@ -80,7 +86,9 @@ def set_upvoted(reddit, items, brief):
 
 def get_downvoted(reddit):
     try:
-        return list(reddit.user.me().downvoted(limit=None))
+        downvoted = list(reddit.user.me().downvoted(limit=None))
+        return [item for item in downvoted
+                if datetime.datetime.fromtimestamp(item.created_utc) > _archive_cutoff_date]
     except Exception as e:
         print('!!! failed to fetch downvoted items: {}'.format(e))
         return []
