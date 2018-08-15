@@ -333,7 +333,7 @@ def set_preferences(reddit, item, brief):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="""This script allows one to Transfer user data between
+    parser = argparse.ArgumentParser(description="""This script allows one to transfer user data between
                                                     Reddit accounts. Before using this script, go to
                                                     Preferences > Apps for each Reddit account and
                                                     create a "personal use script" with a placeholder
