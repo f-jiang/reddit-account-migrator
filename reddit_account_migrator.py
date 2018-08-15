@@ -134,6 +134,46 @@ def set_downvoted(reddit, items, brief):
     return n_failed
 
 
+def clear_votes(reddit, items, brief):
+    n_items = len(items)
+    field_width = len(str(n_items))
+    n_failed = 0
+
+    for i in range(n_items):
+        if type(items[i]) == praw.models.Submission:
+            try:
+                submission = reddit.submission(items[i].id)
+                submission.clear_vote()
+
+                if not brief:
+                    print('=== ({:<{width}} of {:<{width}}) cleared vote from submission titled "{}" from subreddit "{}"'
+                          .format(i + 1,
+                                  n_items,
+                                  submission.title,
+                                  submission.subreddit.display_name,
+                                  width=field_width))
+            except Exception as e:
+                print('!!! failed to clear vote from submission: {}'.format(e))
+                n_failed += 1
+        elif type(items[i]) == praw.models.Comment:
+            try:
+                comment = reddit.comment(items[i].id)
+                comment.clear_vote()
+
+                if not brief:
+                    print('=== ({:<{width}} of {:<{width}}) cleared vote from comment with body "{}..." from submission "{}"'
+                          .format(i + 1,
+                                  n_items,
+                                  comment.body[:40],
+                                  comment.link_title,
+                                  width=field_width))
+            except Exception as e:
+                print('!!! failed to clear vote from comment: {}'.format(e))
+                n_failed += 1
+
+    return n_failed
+
+
 def get_saved(reddit):
     try:
         return list(reddit.user.me().saved(limit=None))
@@ -293,8 +333,17 @@ def set_preferences(reddit, item, brief):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Transfer user data between Reddit accounts')
+    parser = argparse.ArgumentParser(description="""This script allows one to Transfer user data between
+                                                    Reddit accounts. Before using this script, go to
+                                                    Preferences > Apps for each Reddit account and
+                                                    create a "personal use script" with a placeholder
+                                                    redirect uri such as `http://localhost:8080`. Take
+                                                    note of the app's client ID and secret.""")
     parser.add_argument('-q', '--brief', action='store_true', help='suppress status output')
+    parser.add_argument('-t',
+                        '--transfer-votes',
+                        action='store_true',
+                        help='move your upvotes and downvotes to your new account (do at your own risk)')
     args = parser.parse_args()
 
     old_client_id = input('>>> enter client id for old account: ')
@@ -330,19 +379,20 @@ if __name__ == '__main__':
     if not args.brief:
         print('=== found {} {}'.format(n_subreddits, 'subreddit' if n_subreddits == 1 else 'subreddits'))
 
-    if not args.brief:
-        print('=== fetching upvoted items...')
-    upvoted = get_upvoted(old_acct_reddit)
-    n_upvoted = len(upvoted)
-    if not args.brief:
-        print('=== found {} upvoted {}'.format(n_upvoted, 'item' if n_upvoted == 1 else 'items'))
+    if args.transfer_votes:
+        if not args.brief:
+            print('=== fetching upvoted items...')
+        upvoted = get_upvoted(old_acct_reddit)
+        n_upvoted = len(upvoted)
+        if not args.brief:
+            print('=== found {} upvoted {}'.format(n_upvoted, 'item' if n_upvoted == 1 else 'items'))
 
-    if not args.brief:
-        print('=== fetching downvoted items...')
-    downvoted = get_downvoted(old_acct_reddit)
-    n_downvoted = len(downvoted)
-    if not args.brief:
-        print('=== found {} downvoted {}'.format(n_downvoted, 'item' if n_downvoted == 1 else 'items'))
+        if not args.brief:
+            print('=== fetching downvoted items...')
+        downvoted = get_downvoted(old_acct_reddit)
+        n_downvoted = len(downvoted)
+        if not args.brief:
+            print('=== found {} downvoted {}'.format(n_downvoted, 'item' if n_downvoted == 1 else 'items'))
 
     if not args.brief:
         print('=== fetching saved items...')
@@ -383,11 +433,18 @@ if __name__ == '__main__':
     print('=== subscribing to {} {}...'.format(n_subreddits, 'subreddit' if n_subreddits == 1 else 'subreddits'))
     set_subreddits(new_acct_reddit, subreddits, args.brief)
 
-    print('=== upvoting {} {}...'.format(n_upvoted, 'item' if n_upvoted == 1 else 'items'))
-    set_upvoted(new_acct_reddit, upvoted[::-1], args.brief)
+    if args.transfer_votes:
+        print('=== removing {} upvoted {} from old account...'.format(n_upvoted, 'item' if n_upvoted == 1 else 'items'))
+        clear_votes(old_acct_reddit, upvoted, args.brief)
 
-    print('=== downvoting {} {}...'.format(n_downvoted, 'item' if n_downvoted == 1 else 'items'))
-    set_downvoted(new_acct_reddit, downvoted[::-1], args.brief)
+        print('=== upvoting {} {}...'.format(n_upvoted, 'item' if n_upvoted == 1 else 'items'))
+        set_upvoted(new_acct_reddit, upvoted[::-1], args.brief)
+
+        print('=== removing {} downvoted {} from old account...'.format(n_downvoted, 'item' if n_downvoted == 1 else 'items'))
+        clear_votes(old_acct_reddit, downvoted, args.brief)
+
+        print('=== downvoting {} {}...'.format(n_downvoted, 'item' if n_downvoted == 1 else 'items'))
+        set_downvoted(new_acct_reddit, downvoted[::-1], args.brief)
 
     print('=== saving {} {}...'.format(n_saved, 'item' if n_saved == 1 else 'items'))
     set_saved(new_acct_reddit, saved[::-1], args.brief)
