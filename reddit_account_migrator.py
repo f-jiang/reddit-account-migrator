@@ -335,8 +335,8 @@ def set_preferences(reddit, item, brief):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""This script allows one to transfer user data between
                                                     Reddit accounts. Before using this script, go to
-                                                    Preferences > Apps for each Reddit account and
-                                                    create a "personal use script" with a placeholder
+                                                    "Preferences > Apps" for each Reddit account and
+                                                    create a personal use "script" with a placeholder
                                                     redirect uri such as `http://localhost:8080`. Take
                                                     note of the app's client ID and secret.""")
     parser.add_argument('-q', '--brief', action='store_true', help='suppress status output')

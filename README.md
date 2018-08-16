@@ -18,8 +18,8 @@
 usage: reddit_account_migrator.py [-h] [-q] [-t]
 
 This script allows one to transfer user data between Reddit accounts. Before
-using this script, go to Preferences > Apps for each Reddit account and create
-a "personal use script" with a placeholder redirect uri such as
+using this script, go to "Preferences > Apps" for each Reddit account and create
+a personal use "script" with a placeholder redirect uri such as
 `http://localhost:8080`. Take note of the app's client ID and secret.
 
 optional arguments:
