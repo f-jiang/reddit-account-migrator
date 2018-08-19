@@ -219,7 +219,7 @@ def set_saved(reddit, items, brief):
                 print('!!! failed to save comment: {}'.format(e))
                 n_failed += 1
 
-        return n_failed
+    return n_failed
 
 
 def get_hidden(reddit):
